@@ -1,82 +1,46 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import uuid from 'react-uuid';
+import { useState } from 'react';
+
+
+const d = localStorage.getItem("users") != null
+    ? JSON.parse(localStorage.getItem("users") || "[]")
+    : [];
 
 
 
-export const getDataAsync: any = createAsyncThunk(
-    "todos/getDataAsync",
-    async () => {
-        const response = await fetch(`http://localhost:3000/todos`);
-        if (response.ok) {
-            const todosData = await response.json();
-            return { todosData };
-        }
-    }
-);
-
-
-export const addDataAsync: any = createAsyncThunk(
-    "todos/addDataAsync",
-    async (payload: any) => {
-        const response = await fetch(`http://localhost:3000/todos`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ element: payload.element }),
-        });
-        if (response.ok) {
-            const todo = await response.json();
-            return { todo };
-        }
-    }
-);
-
-export const deleteDataAsync: any = createAsyncThunk(
-    "todos/deleteDataAsync",
-    async (payload: any) => {
-        const response = await fetch(
-            `http://localhost:3000/todos/${payload.id}`,
-            {
-                method: "DELETE",
-            }
-        );
-        if (response.ok) {
-            return { id: payload.id };
-        }
-    }
-);
-
-
-
-
-export interface Todo {
-    id: string,
-    element: string
-}
+// export interface Todo {
+//     id: string,
+//     element: string
+// }
 
 export const todos = createSlice({
+
     name: 'todos',
-    initialState: [] as Todo[],
+    initialState: d,
     reducers: {
 
-        add: (state: any, action: PayloadAction<string>) => {
-            const newTask = state.push({
+        add: (state: any, action: any) => {
+            state.push({
                 id: uuid(),
                 element: action.payload
-
             })
+            localStorage.setItem("users", JSON.stringify(state));
+
+
         },
 
-        remove: (state, action: PayloadAction<string>) => {
-            return state.filter((todo) => todo.id !== action.payload);
+        remove: (state, action: any) => {
+            const filtered = state.filter((todo: any) => todo.id !== action.payload);
+
+            localStorage.setItem("users", JSON.stringify(filtered));
+            window.location.reload();
         }
     },
 
 })
 
-
-export const { add, remove } = todos.actions
+export const { add, remove } = todos.actions;
 
 
 export default todos
